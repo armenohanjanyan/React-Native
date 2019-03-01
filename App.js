@@ -1,6 +1,5 @@
 import React from 'react';
 import firebase from 'firebase';
-import ReactTwitchEmbedVideo from "react-twitch-embed-video"
 
 import {
   StyleSheet,
@@ -14,7 +13,8 @@ import {
   WebView,
   Keyboard,
   Modal,
-  Alert
+  Alert,
+  TouchableOpacity
 } from 'react-native';
 
 export default class App extends React.Component {
@@ -43,7 +43,7 @@ export default class App extends React.Component {
     comment: '',
     user: false,
     userName: '',
-    modalVisible: 'visible'
+    modalVisible: false
   }
 
   addCommentText = (e) => {
@@ -65,15 +65,17 @@ export default class App extends React.Component {
         ...comments,
       });
       Keyboard.dismiss()
-
     }
+  }
+
+  setModalVisible(visible) {
+    this.setState({ modalVisible: visible });
   }
 
   render() {
     const { comments } = this.state;
     const { comment } = this.state;
 
-    let date = <Text style={{ textAlign: 'right', width: '100%', fontSize: 12, marginRight: 2 }}>{new Date().getHours() + ':' + new Date().getMinutes()}</Text>
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
         <View style={{ height: 70, width: '100%', backgroundColor: 'rgb(27, 28, 32)', paddingTop: 20, paddingStart: 90 }}>
@@ -97,11 +99,12 @@ export default class App extends React.Component {
                 </View>
               ))}
           </View >
+          <KeyboardAvoidingView behavior='position' enabled>
           <Modal
+            style={{marginLeft: 30}}
             animationType="slide"
-            transparent={true}
-            style={{ backgroundColor: 'black', height: 100 }}
-            visible={true}
+            transparent={false}
+            visible={this.state.modalVisible}
             onRequestClose={() => {
               Alert.alert('Modal has been closed.');
             }}>
@@ -109,29 +112,65 @@ export default class App extends React.Component {
               flex: 1,
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'stretch',
-              paddingHorizontal: 20,
+              width: '100%',
+              backgroundColor: 'rgb(49, 50, 54)'
             }}>
-              <View style={{ height: 50, backgroundColor: 'skyblue' }} />
-              <View style={{ height: 100, backgroundColor: 'steelblue' }} />
+              <Text style={{ color: 'white', fontSize: 30, width: '100%', paddingHorizontal: 50}}>
+                write Your Nickname
+              </Text>
+              <View style={{ padding: 40 }}>
+                <TextInput
+                    autoFocus={true}
+                    style={{
+                    height: 50,
+                    backgroundColor: 'white',
+                    width: '100%'
+                  }}
+                />
+              </View>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                width: '100%',
+                height: 50,
+                padding: 5
+              }}>
+                <View style={{backgroundColor: '#808080'}}>
+                  <Button
+                    title="Cencel"
+                    color="black"
+                    onPress={() => this.setState({ modalVisible: false })}
+                  />
+                </View>
+                <View style={{backgroundColor: '#808080'}}>
+                  <Button
+                    title="Accept"
+                    color="white"
+                    onPress={() => this.setState({ modalVisible: false })}
+                  />
+                </View>
+              </View>
             </View>
           </Modal>
+          </KeyboardAvoidingView>     
         </ScrollView>
-        <View style={styles.inputContainer} >
-          <TextInput
-            onChangeText={(comment) => this.setState({ comment })}
-            style={styles.input}
-            value={comment}
-            placeholder={this.state.user ? "leave your comment here..." : "write your nickname to join comments"}
-          />
-          <View style={{ width: '20%', backgroundColor: '#808080', height: 50, padding: 5 }}>
-            <Button
-              title="Send"
-              color="black"
-              onPress={() => this.addComment()}
+        <TouchableOpacity onPress={() => this.setModalVisible(true)}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              onChangeText={(e) => this.setState({ comment: e })}
+              pointerEvents="none"
+              style={styles.input}
+              value={comment}
             />
+            <View style={{ width: '20%', backgroundColor: '#808080', height: 50, padding: 5 }}>
+              <Button
+                title="Send"
+                color="black"
+                onPress={() => this.addComment()}
+              />
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     );
   }
@@ -156,5 +195,11 @@ const styles = StyleSheet.create({
     borderColor: '#B4A8A8',
     paddingLeft: 15,
     paddingRight: 15,
+  },
+  nickName: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    bottom: 0,
+    paddingHorizontal: 20
   }
 });
